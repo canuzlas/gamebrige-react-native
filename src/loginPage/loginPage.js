@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, Image, StyleSheet, ToastAndroid,Platform, TouchableOpacity, SafeAreaView} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, ToastAndroid, Platform, TouchableOpacity, SafeAreaView } from 'react-native';
 import * as Axios from 'axios';
-import {API_SITE,API_SITE_IOS} from '@env';
-import {useHookstate} from '@hookstate/core';
+import { API_SITE, API_SITE_IOS } from '@env';
+import { useHookstate } from '@hookstate/core';
 import start_page_global_state from '../../hookStates/start_page_hs';
 import user_global_stage from '../../hookStates/user_data_hs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,24 +11,25 @@ import {
   GoogleSigninButton,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import { AppleButton,appleAuth } from '@invertase/react-native-apple-authentication';
+import { AppleButton, appleAuth } from '@invertase/react-native-apple-authentication';
 require('../../gpOauth');
 
-export default ExampleComponent = ({navigation}) => {
+export default ExampleComponent = ({ navigation }) => {
   const login_page_local_state_from_start_page = useHookstate(start_page_global_state);
   const login_page_local_state_from_user_global_state = useHookstate(user_global_stage);
-   
+
   useEffect(() => {
-    const loginApple = async ()=>{
+   if(Platform.OS==="ios"){
+    const loginApple = async () => {
       const resjwt = await Axios.default.post(API_SITE_IOS + 'api', {
         token: login_page_local_state_from_start_page.get(),
       });
-  
+
       if (resjwt.data.error === 'false') {
         const result = await Axios.default.post(
           API_SITE_IOS + 'api/registerorlogin',
           {
-            user: {email:"canuzlass@gmail.com"},
+            user: { email: "canuzlass@gmail.com" },
           },
         );
         console.log(result.data)
@@ -50,7 +51,7 @@ export default ExampleComponent = ({navigation}) => {
           }, 1000);
         }
       } else {
-      return 0;
+        return 0;
       }
     }
     loginApple()
@@ -59,6 +60,8 @@ export default ExampleComponent = ({navigation}) => {
     return appleAuth.onCredentialRevoked(async () => {
       console.warn('If this function executes, User Credentials have been Revoked');
     });
+   }
+   
   }, []);
 
   //const [gpOauthUser, setgpOauthUser] = useState([]);
@@ -167,45 +170,54 @@ export default ExampleComponent = ({navigation}) => {
       });
 
       console.log(appleAuthRequestResponse.user)
-    
+
       // get current authentication state for user
       // /!\ This method must be tested on a real device. On the iOS simulator it always throws an error.
       const credentialState = await appleAuth.getCredentialStateForUser(appleAuthRequestResponse.user);
-    
+
       // use credentialState response to ensure the user is authenticated
       if (credentialState === appleAuth.State.AUTHORIZED) {
         // user is authenticated
       }
     } catch (error) {
-console.log(error)
+      console.log(error)
     }
   }
   return (
+    Platform.OS === 'ios' ?
       <SafeAreaView>
         <View style={styles.head_view}>
+          <Image
+            style={{ width: 200, height: 200 }}
+            source={require('../../assets/logotrns.png')}></Image>
+          {/* <Text style={styles.logoText}>GAMEBRİGE</Text> */}
+          <AppleButton
+            buttonStyle={AppleButton.Style.WHITE}
+            buttonType={AppleButton.Type.SIGN_IN}
+            style={{
+              width: 160, // You must specify a width
+              height: 45, // You must specify a height
+            }}
+            onPress={() => onAppleButtonPress()}
+          />
+        </View>
+      </SafeAreaView>
+      :
+      <View style={styles.head_view}>
         <Image
-          style={{width: 200, height: 200}}
+          style={{ width: 200, height: 200 }}
           source={require('../../assets/logotrns.png')}></Image>
         {/* <Text style={styles.logoText}>GAMEBRİGE</Text> */}
-       {Platform.OS === "ios"? <AppleButton
-        buttonStyle={AppleButton.Style.WHITE}
-        buttonType={AppleButton.Type.SIGN_IN}
-        style={{
-          width: 160, // You must specify a width
-          height: 45, // You must specify a height
-        }}
-        onPress={() => onAppleButtonPress()}
-      />
-      : <GoogleSigninButton
+
+        <GoogleSigninButton
           style={styles.googleButton}
           size={GoogleSigninButton.Size.Wide}
           color={GoogleSigninButton.Color.Light}
           onPress={this.signIn}
-        />} 
-        
-  
+        />
+
+
       </View>
-      </SafeAreaView>
   );
 };
 
