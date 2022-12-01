@@ -83,7 +83,7 @@ const Home = ({navigation}) => {
           source={require('../../assets/bgremoved.png')}></Image>
       </View>
       <ScrollView style={styles.scroll_view}>
-      <TextInput
+      <TextInput  
           value={blogTitle}
           style={styles.titleInput}
           cursorColor={'white'}
